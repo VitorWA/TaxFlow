@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "packageVersion": "0.1.0",
+  "tools": [
+    "claude"
+  ],
+  "files": [
+    {
+      "path": ".claude/skills/mashure-setup/SKILL.md",
+      "sha256": "9fef9935e14b983620f33d8cc9df391a0d6b3ede99d751c615acbb1604976c1e"
+    },
+    {
+      "path": ".claude/skills/mashure-req-interview/SKILL.md",
+      "sha256": "a6b7470242ec08aecbef717afb2140328db1aa88d42bd06ac4693d75c5810836"
+    },
+    {
+      "path": ".claude/skills/mashure-tech-interview/SKILL.md",
+      "sha256": "a31f933c4165cbe8e6cdc6c1afba0169204327d9f321fcf155b28dbacdb09e74"
+    },
+    {
+      "path": ".claude/skills/mashure-propose/SKILL.md",
+      "sha256": "c2ecd7e88cc9ea964182d9d2e961cbad56211308d55d8459c3c11a19f6388bf7"
+    },
+    {
+      "path": ".claude/skills/mashure-apply/SKILL.md",
+      "sha256": "25b260fa15eb341b56849246e22d9679d9e12d132958e33025fae44fe11bef1c"
+    },
+    {
+      "path": ".claude/skills/mashure-explore/SKILL.md",
+      "sha256": "fa70c707b44ec450eab326815d1a40e157496ef5195f16f34527fb0730629a36"
+    },
+    {
+      "path": ".claude/skills/mashure-review/SKILL.md",
+      "sha256": "1affe3326ea207b17698a2d7423e9ef8c808e670f27ae5b3f2bc4ee5c9a0eb6e"
+    },
+    {
+      "path": ".claude/skills/mashure-capture/SKILL.md",
+      "sha256": "7de93db15acf87a793a85b0331bbed29a20bb346ec691a708aaf00c204cf4e51"
+    },
+    {
+      "path": ".claude/skills/mashure-sync/SKILL.md",
+      "sha256": "0f14814928b0635260746cdb1491d3caff8aeb7e1dde39419c2e79718182e167"
+    },
+    {
+      "path": ".claude/skills/mashure-archive/SKILL.md",
+      "sha256": "688ea67afd035e74f4dcb4556ea1b2d11efea95bc86b4a98bfa5821692bc81f1"
+    }
+  ]
+}
