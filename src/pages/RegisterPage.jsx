@@ -5,12 +5,15 @@ import AuthField from "../components/auth/AuthField";
 import PasswordInput from "../components/auth/PasswordInput";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
+import { apiRequest } from "../lib/api";
+import { handleCnpjInput, isValidCnpj } from "../utils/cnpj";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false);
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     const values = Object.fromEntries(form.entries());
@@ -18,13 +21,25 @@ export default function RegisterPage() {
 
     if (!values.name?.trim()) nextErrors.name = "Informe seu nome completo.";
     if (!values.email?.trim()) nextErrors.email = "Informe seu e-mail profissional.";
+    if (values.cnpj && !isValidCnpj(values.cnpj)) nextErrors.cnpj = "Informe um CNPJ válido.";
     if (!values.password || values.password.length < 8) nextErrors.password = "A senha precisa ter pelo menos 8 caracteres.";
     if (values.confirmPassword !== values.password) nextErrors.confirmPassword = "As senhas não coincidem.";
     if (!values.terms) nextErrors.terms = "Você precisa aceitar os termos para continuar.";
 
     setErrors(nextErrors);
-    if (Object.keys(nextErrors).length === 0) {
+    if (Object.keys(nextErrors).length > 0) return;
+
+    setSubmitting(true);
+    try {
+      await apiRequest("/api/auth/register", {
+        method: "POST",
+        body: JSON.stringify(values),
+      });
       navigate("/login", { state: { accountCreated: true } });
+    } catch (error) {
+      setErrors({ ...error.fields, form: error.message });
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -37,6 +52,7 @@ export default function RegisterPage() {
       </div>
 
       <form className="space-y-5" onSubmit={handleSubmit} noValidate>
+        {errors.form && <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">{errors.form}</p>}
         <AuthField label="Nome completo" error={errors.name}>
           <div className="relative">
             <UserRound className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
@@ -51,8 +67,16 @@ export default function RegisterPage() {
               <Input name="company" autoComplete="organization" placeholder="Nome da empresa" className="pl-11" />
             </div>
           </AuthField>
-          <AuthField label="CNPJ" hint="Opcional">
-            <Input name="cnpj" inputMode="numeric" placeholder="00.000.000/0000-00" />
+          <AuthField label="CNPJ" hint="Opcional; aceita números e letras." error={errors.cnpj}>
+            <Input
+              name="cnpj"
+              inputMode="text"
+              autoCapitalize="characters"
+              maxLength={18}
+              placeholder="12.ABC.345/01DE-35"
+              onInput={handleCnpjInput}
+              aria-invalid={Boolean(errors.cnpj)}
+            />
           </AuthField>
         </div>
 
@@ -79,8 +103,8 @@ export default function RegisterPage() {
           {errors.terms && <p className="mt-2 text-xs font-medium text-red-500" role="alert">{errors.terms}</p>}
         </div>
 
-        <Button type="submit" className="w-full gap-2 py-3.5">
-          Criar conta
+        <Button type="submit" disabled={submitting} className="w-full gap-2 py-3.5 disabled:cursor-not-allowed disabled:opacity-60">
+          {submitting ? "Criando conta..." : "Criar conta"}
           <ArrowRight size={17} />
         </Button>
       </form>

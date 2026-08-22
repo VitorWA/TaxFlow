@@ -5,26 +5,38 @@ import AuthField from "../components/auth/AuthField";
 import PasswordInput from "../components/auth/PasswordInput";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { login } = useAuth();
   const [errors, setErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false);
   const accountCreated = location.state?.accountCreated;
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     const email = form.get("email")?.trim();
     const password = form.get("password")?.trim();
+    const remember = form.get("remember") === "on";
     const nextErrors = {};
 
     if (!email) nextErrors.email = "Informe seu e-mail.";
     if (!password) nextErrors.password = "Informe sua senha.";
 
     setErrors(nextErrors);
-    if (Object.keys(nextErrors).length === 0) {
-      navigate("/dashboard");
+    if (Object.keys(nextErrors).length > 0) return;
+
+    setSubmitting(true);
+    try {
+      await login(email, password, remember);
+      navigate(location.state?.from || "/dashboard", { replace: true });
+    } catch (error) {
+      setErrors({ form: error.message });
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -44,6 +56,7 @@ export default function LoginPage() {
       )}
 
       <form className="space-y-5" onSubmit={handleSubmit} noValidate>
+        {errors.form && <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">{errors.form}</p>}
         <AuthField label="E-mail" error={errors.email}>
           <div className="relative">
             <Mail className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
@@ -80,15 +93,11 @@ export default function LoginPage() {
           <Link to="/recuperar-acesso" className="font-bold text-orange-500 transition hover:text-orange-600">Esqueci minha senha ou e-mail</Link>
         </div>
 
-        <Button type="submit" className="w-full gap-2 py-3.5">
-          Entrar
+        <Button type="submit" disabled={submitting} className="w-full gap-2 py-3.5 disabled:cursor-not-allowed disabled:opacity-60">
+          {submitting ? "Entrando..." : "Entrar"}
           <ArrowRight size={17} />
         </Button>
       </form>
-
-      <div className="mt-6 rounded-2xl bg-slate-100/80 px-4 py-3 text-center text-xs leading-5 text-slate-500">
-        Ambiente demonstrativo: a autenticação real será conectada ao backend em uma próxima etapa.
-      </div>
 
       <p className="mt-8 text-center text-sm text-slate-500">
         Ainda não tem uma conta?{" "}

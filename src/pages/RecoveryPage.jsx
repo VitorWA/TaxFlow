@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import AuthField from "../components/auth/AuthField";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
+import { handleCnpjInput, isValidCnpj } from "../utils/cnpj";
 
 const modes = [
   { id: "senha", label: "Recuperar senha", icon: KeyRound },
@@ -28,6 +29,10 @@ export default function RecoveryPage() {
 
     if (!requiredValue?.trim()) {
       setError(mode === "senha" ? "Informe o e-mail cadastrado." : "Informe o CNPJ da empresa.");
+      return;
+    }
+    if (mode === "email" && !isValidCnpj(requiredValue)) {
+      setError("Informe um CNPJ válido.");
       return;
     }
 
@@ -92,7 +97,16 @@ export default function RecoveryPage() {
               <AuthField label="CNPJ da empresa" error={error}>
                 <div className="relative">
                   <Building2 className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                  <Input name="cnpj" inputMode="numeric" placeholder="00.000.000/0000-00" className="pl-11" aria-invalid={Boolean(error)} />
+                  <Input
+                    name="cnpj"
+                    inputMode="text"
+                    autoCapitalize="characters"
+                    maxLength={18}
+                    placeholder="12.ABC.345/01DE-35"
+                    className="pl-11"
+                    onInput={handleCnpjInput}
+                    aria-invalid={Boolean(error)}
+                  />
                 </div>
               </AuthField>
               <AuthField label="Telefone para contato" hint="Opcional">

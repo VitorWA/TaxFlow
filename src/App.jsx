@@ -13,6 +13,7 @@ import ResultPage from "./pages/ResultPage";
 import DetailPage from "./pages/DetailPage";
 import AlertsPage from "./pages/AlertsPage";
 import ReportsPage from "./pages/ReportsPage";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 function App() {
   return (
@@ -23,17 +24,19 @@ function App() {
         <Route path="/cadastro" element={<RegisterPage />} />
         <Route path="/recuperar-acesso" element={<RecoveryPage />} />
       </Route>
-      <Route element={<AppShell />}>
-        <Route path="/dashboard" element={<DashboardPage activeSection="dashboard" />} />
-        <Route path="/nova-consulta" element={<DashboardPage activeSection="nova-consulta" />} />
-        <Route path="/historico" element={<HistoryPage />} />
-        <Route path="/favoritos" element={<FavoritesPage />} />
-        <Route path="/alertas" element={<AlertsPage />} />
-        <Route path="/relatorios" element={<ReportsPage />} />
-        <Route path="/configuracoes" element={<SettingsPage />} />
+      <Route element={<ProtectedRoute />}>
+        <Route element={<AppShell />}>
+          <Route path="/dashboard" element={<DashboardPage activeSection="dashboard" />} />
+          <Route path="/nova-consulta" element={<DashboardPage activeSection="nova-consulta" />} />
+          <Route path="/historico" element={<HistoryPage />} />
+          <Route path="/favoritos" element={<FavoritesPage />} />
+          <Route path="/alertas" element={<AlertsPage />} />
+          <Route path="/relatorios" element={<ReportsPage />} />
+          <Route path="/configuracoes" element={<SettingsPage />} />
+        </Route>
+        <Route path="/resultado" element={<ResultPage />} />
+        <Route path="/detalhamento" element={<DetailPage />} />
       </Route>
-      <Route path="/resultado" element={<ResultPage />} />
-      <Route path="/detalhamento" element={<DetailPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

@@ -12,5 +12,15 @@ export default defineConfig({
     hmr: {
       clientPort: 3000,
     },
+    proxy: {
+      "/api": {
+        target: "http://taxflow-api:8080",
+        changeOrigin: true,
+      },
+      "/sanctum": {
+        target: "http://taxflow-api:8080",
+        changeOrigin: true,
+      },
+    },
   },
 });

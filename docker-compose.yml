@@ -5,6 +5,56 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - .:/app
+      - ./src:/app/src
+      - ./index.html:/app/index.html
+      - ./vite.config.js:/app/vite.config.js
+      - ./postcss.config.js:/app/postcss.config.js
       - /app/node_modules
     command: npm run dev
+    depends_on:
+      - taxflow-api
+
+  taxflow-api:
+    build:
+      context: ./backend
+    environment:
+      APP_ENV: ${APP_ENV:-local}
+      APP_DEBUG: ${APP_DEBUG:-true}
+      APP_URL: ${APP_URL:-http://localhost:3000}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      DB_CONNECTION: mysql
+      DB_HOST: taxflow-db
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-taxflow}
+      DB_USERNAME: ${DB_USERNAME:-taxflow}
+      DB_PASSWORD: ${DB_PASSWORD:-taxflow_dev_password}
+      SESSION_DRIVER: database
+      SESSION_SECURE_COOKIE: ${SESSION_SECURE_COOKIE:-false}
+      SESSION_SAME_SITE: lax
+      SANCTUM_STATEFUL_DOMAINS: ${SANCTUM_STATEFUL_DOMAINS:-localhost:3000,127.0.0.1:3000}
+    volumes:
+      - ./backend:/app
+      - /app/vendor
+    depends_on:
+      taxflow-db:
+        condition: service_healthy
+
+  taxflow-db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-taxflow}
+      MYSQL_USER: ${DB_USERNAME:-taxflow}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-taxflow_dev_password}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-taxflow_root_dev_password}
+    ports:
+      - "3306:3306"
+    volumes:
+      - taxflow_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${DB_ROOT_PASSWORD:-taxflow_root_dev_password}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  taxflow_mysql_data:
