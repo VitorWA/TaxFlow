@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mashure: Aplicar Change"
+  short_description: "Implementa tasks aprovadas da change"
+  default_prompt: "Use $mashure-apply para executar este fluxo Mashure."
