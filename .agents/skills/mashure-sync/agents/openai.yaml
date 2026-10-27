@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mashure: Sincronizar Specs"
+  short_description: "Promove deltas sem arquivar a change"
+  default_prompt: "Use $mashure-sync para executar este fluxo Mashure."

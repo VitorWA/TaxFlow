@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mashure: Revisar Change"
+  short_description: "Revisa a implementa��o contra a change"
+  default_prompt: "Use $mashure-review para executar este fluxo Mashure."

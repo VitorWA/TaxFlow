@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mashure: Configurar"
+  short_description: "Configura o workflow Mashure no projeto"
+  default_prompt: "Use $mashure-setup para executar este fluxo Mashure."
