@@ -2,6 +2,7 @@ export default function Button({
   children,
   variant = "primary",
   className = "",
+  as: Component = "button",
   ...props
 }) {
   const variants = {
@@ -13,11 +14,11 @@ export default function Button({
   };
 
   return (
-    <button
+    <Component
       className={`inline-flex items-center justify-center rounded-2xl px-4 py-2.5 text-sm font-semibold transition ${variants[variant]} ${className}`}
       {...props}
     >
       {children}
-    </button>
+    </Component>
   );
 }
