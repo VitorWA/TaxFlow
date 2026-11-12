@@ -1,0 +1,1202 @@
+{
+  "info": {
+    "name": "TaxFlow — fluxo real HTTP/MySQL",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Executar em ordem no Runner, uma iteração. Ambiente isolado docker-compose.postman.yml. Não usar em produção."
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:18000"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (pm.info.requestName === \"01 Health MySQL e Redis\") {",
+          "const run=String(Date.now()); pm.collectionVariables.set(\"run_id\",run);",
+          "let base=run.slice(-8).padStart(8,\"0\")+\"0001\";",
+          "function digit(s,w){const r=[...s].reduce((a,c,i)=>a+Number(c)*w[i],0)%11; return String(r<2?0:11-r);}",
+          "base+=digit(base,[5,4,3,2,9,8,7,6,5,4,3,2]); base+=digit(base,[6,5,4,3,2,9,8,7,6,5,4,3,2]);",
+          "pm.collectionVariables.set(\"cnpj\",base);",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "01 Health MySQL e Redis",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/health"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.test(\"Dependências reais OK\", () => pm.expect(pm.response.json()).to.deep.eql({status:\"ok\",checks:{database:\"ok\",redis:\"ok\"}}));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 Empresas sem token",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/companies"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.test(\"Erro padronizado\", () => { const b=pm.response.json(); pm.expect(b.error.code).to.be.a(\"string\"); pm.expect(b.request_id).to.eql(pm.response.headers.get(\"X-Request-ID\")); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 Login inválido",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"owner@postman.test\",\n  \"password\": \"errada\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.test(\"Erro padronizado\", () => { const b=pm.response.json(); pm.expect(b.error.code).to.be.a(\"string\"); pm.expect(b.request_id).to.eql(pm.response.headers.get(\"X-Request-ID\")); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 Regressão email array",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": [],\n  \"password\": \"test\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 422\", () => pm.response.to.have.status(422));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.test(\"Erro padronizado\", () => { const b=pm.response.json(); pm.expect(b.error.code).to.be.a(\"string\"); pm.expect(b.request_id).to.eql(pm.response.headers.get(\"X-Request-ID\")); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 Regressão email objeto",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": {\n    \"address\": \"x\"\n  },\n  \"password\": \"test\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 422\", () => pm.response.to.have.status(422));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.test(\"Erro padronizado\", () => { const b=pm.response.json(); pm.expect(b.error.code).to.be.a(\"string\"); pm.expect(b.request_id).to.eql(pm.response.headers.get(\"X-Request-ID\")); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login owner",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"owner@postman.test\",\n  \"password\": \"postman-test-password\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.collectionVariables.set(\"owner_token\", pm.response.json().data.token);",
+              "pm.test(\"Senha não exposta\", () => pm.expect(pm.response.json().data.user).not.to.have.property(\"password\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login member",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"member@postman.test\",\n  \"password\": \"postman-test-password\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.collectionVariables.set(\"member_token\", pm.response.json().data.token);",
+              "pm.test(\"Senha não exposta\", () => pm.expect(pm.response.json().data.user).not.to.have.property(\"password\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login outsider",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"outsider@postman.test\",\n  \"password\": \"postman-test-password\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.collectionVariables.set(\"outsider_token\", pm.response.json().data.token);",
+              "pm.test(\"Senha não exposta\", () => pm.expect(pm.response.json().data.user).not.to.have.property(\"password\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Perfil autenticado",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{owner_token}}"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/auth/me"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.test(\"Usuário correto\", () => pm.expect(pm.response.json().data.email).to.eql(\"owner@postman.test\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Catálogo fiscal",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{owner_token}}"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/domain/enums"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.test(\"27 UFs e 4 regimes\", () => { const d=pm.response.json().data; pm.expect(d.states).to.have.lengthOf(27); pm.expect(d.tax_regimes).to.have.lengthOf(4); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Encontrar fixture de permissões",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{owner_token}}"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/companies?q=Empresa%20Fixture%20Postman"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.test(\"Fixture existe\", () => pm.expect(pm.response.json().data).to.have.lengthOf(1));",
+              "pm.collectionVariables.set(\"fixture_id\", pm.response.json().data[0].id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Criar empresa como owner",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{owner_token}}"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/companies",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cnpj\": \"{{cnpj}}\",\n  \"legal_name\": \"Empresa HTTP {{run_id}}\",\n  \"tax_regime\": \"simples_nacional\",\n  \"state\": \"MT\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.collectionVariables.set(\"company_id\", pm.response.json().data.id);",
+              "pm.test(\"CNPJ e regime persistidos\", () => { const d=pm.response.json().data; pm.expect(d.cnpj).to.eql(pm.collectionVariables.get(\"cnpj\")); pm.expect(d.tax_regime).to.eql(\"simples_nacional\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "CNPJ duplicado",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{owner_token}}"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/companies",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cnpj\": \"{{cnpj}}\",\n  \"legal_name\": \"Empresa HTTP {{run_id}}\",\n  \"tax_regime\": \"simples_nacional\",\n  \"state\": \"MT\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 422\", () => pm.response.to.have.status(422));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.test(\"Erro padronizado\", () => { const b=pm.response.json(); pm.expect(b.error.code).to.be.a(\"string\"); pm.expect(b.request_id).to.eql(pm.response.headers.get(\"X-Request-ID\")); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "CNPJ inválido",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{owner_token}}"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/companies",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cnpj\": \"00000000000000\",\n  \"legal_name\": \"Empresa HTTP {{run_id}}\",\n  \"tax_regime\": \"simples_nacional\",\n  \"state\": \"MT\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 422\", () => pm.response.to.have.status(422));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.test(\"Erro padronizado\", () => { const b=pm.response.json(); pm.expect(b.error.code).to.be.a(\"string\"); pm.expect(b.request_id).to.eql(pm.response.headers.get(\"X-Request-ID\")); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Consultar empresa recém-criada",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{owner_token}}"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/companies/{{company_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Atualizar como owner",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{owner_token}}"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/companies/{{company_id}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"trade_name\": \"Alterada pelo HTTP\",\n  \"tax_regime\": \"lucro_presumido\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Confirmar persistência após atualização",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{owner_token}}"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/companies/{{company_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.test(\"Alterações persistidas no MySQL\", () => { const d=pm.response.json().data; pm.expect(d.trade_name).to.eql(\"Alterada pelo HTTP\"); pm.expect(d.tax_regime).to.eql(\"lucro_presumido\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Paginação filtro e ordem",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{owner_token}}"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/companies?q={{run_id}}&sort=legal_name&direction=desc&per_page=1"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.test(\"Paginação correta\", () => { const b=pm.response.json(); pm.expect(b.meta.total).to.eql(1); pm.expect(b.data[0].id).to.eql(pm.collectionVariables.get(\"company_id\")); pm.expect(b.links).to.have.property(\"next\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Paginação fora do limite",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{owner_token}}"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/companies?per_page=101"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 422\", () => pm.response.to.have.status(422));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.test(\"Erro padronizado\", () => { const b=pm.response.json(); pm.expect(b.error.code).to.be.a(\"string\"); pm.expect(b.request_id).to.eql(pm.response.headers.get(\"X-Request-ID\")); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Member consulta empresa vinculada",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{member_token}}"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/companies/{{fixture_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Member não altera empresa vinculada",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{member_token}}"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/companies/{{fixture_id}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"legal_name\": \"Não deve alterar\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.test(\"Erro padronizado\", () => { const b=pm.response.json(); pm.expect(b.error.code).to.be.a(\"string\"); pm.expect(b.request_id).to.eql(pm.response.headers.get(\"X-Request-ID\")); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Outro usuário não lista empresas",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{outsider_token}}"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/companies"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.test(\"Lista isolada\", () => pm.expect(pm.response.json().data).to.have.lengthOf(0));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Outro usuário não lê por ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{outsider_token}}"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/companies/{{company_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.test(\"Erro padronizado\", () => { const b=pm.response.json(); pm.expect(b.error.code).to.be.a(\"string\"); pm.expect(b.request_id).to.eql(pm.response.headers.get(\"X-Request-ID\")); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Outro usuário não altera por ID",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{outsider_token}}"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/companies/{{company_id}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"legal_name\": \"Ataque\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.test(\"Erro padronizado\", () => { const b=pm.response.json(); pm.expect(b.error.code).to.be.a(\"string\"); pm.expect(b.request_id).to.eql(pm.response.headers.get(\"X-Request-ID\")); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Owner confirma que escrita alheia não ocorreu",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{owner_token}}"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/companies/{{company_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.test(\"Nome original preservado\", () => pm.expect(pm.response.json().data.legal_name).to.eql(\"Empresa HTTP \"+pm.collectionVariables.get(\"run_id\")));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Logout",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{owner_token}}"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/auth/logout"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Token revogado rejeitado",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{owner_token}}"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/auth/me"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.test(\"Erro padronizado\", () => { const b=pm.response.json(); pm.expect(b.error.code).to.be.a(\"string\"); pm.expect(b.request_id).to.eql(pm.response.headers.get(\"X-Request-ID\")); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rate limit tentativa 1",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"limited-{{run_id}}@postman.test\",\n  \"password\": \"errada\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.test(\"Erro padronizado\", () => { const b=pm.response.json(); pm.expect(b.error.code).to.be.a(\"string\"); pm.expect(b.request_id).to.eql(pm.response.headers.get(\"X-Request-ID\")); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rate limit tentativa 2",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"limited-{{run_id}}@postman.test\",\n  \"password\": \"errada\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.test(\"Erro padronizado\", () => { const b=pm.response.json(); pm.expect(b.error.code).to.be.a(\"string\"); pm.expect(b.request_id).to.eql(pm.response.headers.get(\"X-Request-ID\")); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rate limit tentativa 3",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"limited-{{run_id}}@postman.test\",\n  \"password\": \"errada\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.test(\"Erro padronizado\", () => { const b=pm.response.json(); pm.expect(b.error.code).to.be.a(\"string\"); pm.expect(b.request_id).to.eql(pm.response.headers.get(\"X-Request-ID\")); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rate limit tentativa 4",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"limited-{{run_id}}@postman.test\",\n  \"password\": \"errada\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.test(\"Erro padronizado\", () => { const b=pm.response.json(); pm.expect(b.error.code).to.be.a(\"string\"); pm.expect(b.request_id).to.eql(pm.response.headers.get(\"X-Request-ID\")); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rate limit tentativa 5",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"limited-{{run_id}}@postman.test\",\n  \"password\": \"errada\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.test(\"Erro padronizado\", () => { const b=pm.response.json(); pm.expect(b.error.code).to.be.a(\"string\"); pm.expect(b.request_id).to.eql(pm.response.headers.get(\"X-Request-ID\")); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rate limit tentativa 6",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{base_url}}/api/v1/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"limited-{{run_id}}@postman.test\",\n  \"password\": \"errada\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 429\", () => pm.response.to.have.status(429));",
+              "pm.test(\"Request ID presente\", () => pm.expect(pm.response.headers.get(\"X-Request-ID\")).to.match(/^[0-9a-f-]{36}$/));",
+              "pm.test(\"Erro padronizado\", () => { const b=pm.response.json(); pm.expect(b.error.code).to.be.a(\"string\"); pm.expect(b.request_id).to.eql(pm.response.headers.get(\"X-Request-ID\")); });",
+              "pm.test(\"Espera indicada\", () => pm.expect(pm.response.headers.get(\"Retry-After\")).to.exist);"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
