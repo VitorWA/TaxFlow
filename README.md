@@ -61,6 +61,8 @@ curl -i http://localhost:8000/api/health
 
 ## Testes da API
 
+Setup de autenticação, cadastros, importação NCM, docs/OpenAPI, testes MySQL e roteiro manual: [Guia da API](docs/api-local.md). Infra local/produção e pendências externas: [Infraestrutura](docs/infraestrutura.md).
+
 ```sh
 docker compose exec api php artisan test
 ```

@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
+/** Query parameters */
 class CompanyIndexRequest extends FormRequest
 {
     public function authorize(): bool

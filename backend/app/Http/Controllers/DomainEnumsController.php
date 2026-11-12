@@ -12,6 +12,15 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class DomainEnumsController extends Controller
 {
+    /**
+     * Consultar opções do domínio fiscal.
+     *
+     * @group Domínio
+     *
+     * @responseFile 200 docs/examples/enums.json
+     *
+     * @response 401 {"error":{"code":"unauthenticated","message":"Credenciais inválidas ou autenticação necessária.","details":{}},"request_id":"example"}
+     */
     public function __invoke(): JsonResource
     {
         return new JsonResource([

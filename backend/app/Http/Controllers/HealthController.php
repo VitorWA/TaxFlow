@@ -9,6 +9,16 @@ use Throwable;
 
 class HealthController extends Controller
 {
+    /**
+     * Disponibilidade do banco e Redis.
+     *
+     * @group Operação
+     *
+     * @unauthenticated
+     *
+     * @response 200 {"status":"ok","checks":{"database":"ok","redis":"ok"}}
+     * @response 503 {"status":"fail","checks":{"database":"fail","redis":"ok"}}
+     */
     public function __invoke(): JsonResponse
     {
         $checks = [

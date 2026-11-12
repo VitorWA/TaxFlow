@@ -8,6 +8,8 @@ services:
       - .:/app
       - /app/node_modules
     command: npm run dev
+    environment:
+      API_PROXY_TARGET: http://api:8000
 
   api:
     build:
@@ -63,6 +65,40 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+
+  queue:
+    build:
+      context: ./backend
+      target: development
+    environment:
+      TAXFLOW_SKIP_BOOTSTRAP: '1'
+    volumes:
+      - ./backend:/app
+      - api-vendor:/app/vendor
+    command: php artisan queue:work --sleep=1 --tries=3 --timeout=60
+    restart: unless-stopped
+    healthcheck:
+      disable: true
+    depends_on:
+      api:
+        condition: service_healthy
+
+  scheduler:
+    build:
+      context: ./backend
+      target: development
+    environment:
+      TAXFLOW_SKIP_BOOTSTRAP: '1'
+    volumes:
+      - ./backend:/app
+      - api-vendor:/app/vendor
+    command: php artisan schedule:work
+    restart: unless-stopped
+    healthcheck:
+      disable: true
+    depends_on:
+      api:
+        condition: service_healthy
 
 volumes:
   db-data:

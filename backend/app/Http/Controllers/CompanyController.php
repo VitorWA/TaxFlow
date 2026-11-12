@@ -15,6 +15,16 @@ use Illuminate\Validation\ValidationException;
 
 class CompanyController extends Controller
 {
+    /**
+     * Listar empresas acessíveis.
+     *
+     * @responseFile 200 docs/examples/company-list.json
+     *
+     * @response 401 {"error":{"code":"unauthenticated","message":"Credenciais inválidas ou autenticação necessária.","details":{}},"request_id":"example"}
+     * @response 403 {"error":{"code":"forbidden","message":"Acesso não permitido.","details":{}},"request_id":"example"}
+     * @response 404 {"error":{"code":"not_found","message":"Recurso não encontrado.","details":{}},"request_id":"example"}
+     * @response 422 {"error":{"code":"validation_failed","message":"Os dados informados são inválidos.","details":{}},"request_id":"example"}
+     */
     public function index(CompanyIndexRequest $request): AnonymousResourceCollection
     {
         $filters = $request->validated();
@@ -34,6 +44,16 @@ class CompanyController extends Controller
         return CompanyResource::collection($query->paginate($filters['per_page'] ?? 15)->withQueryString());
     }
 
+    /**
+     * Cadastrar empresa e vínculo de proprietário.
+     *
+     * @responseFile 201 docs/examples/company.json
+     *
+     * @response 401 {"error":{"code":"unauthenticated","message":"Credenciais inválidas ou autenticação necessária.","details":{}},"request_id":"example"}
+     * @response 403 {"error":{"code":"forbidden","message":"Acesso não permitido.","details":{}},"request_id":"example"}
+     * @response 404 {"error":{"code":"not_found","message":"Recurso não encontrado.","details":{}},"request_id":"example"}
+     * @response 422 {"error":{"code":"validation_failed","message":"Os dados informados são inválidos.","details":{}},"request_id":"example"}
+     */
     public function store(CompanyWriteRequest $request): CompanyResource
     {
         try {
@@ -50,6 +70,16 @@ class CompanyController extends Controller
         return new CompanyResource($company);
     }
 
+    /**
+     * Consultar empresa.
+     *
+     * @responseFile 200 docs/examples/company.json
+     *
+     * @response 401 {"error":{"code":"unauthenticated","message":"Credenciais inválidas ou autenticação necessária.","details":{}},"request_id":"example"}
+     * @response 403 {"error":{"code":"forbidden","message":"Acesso não permitido.","details":{}},"request_id":"example"}
+     * @response 404 {"error":{"code":"not_found","message":"Recurso não encontrado.","details":{}},"request_id":"example"}
+     * @response 422 {"error":{"code":"validation_failed","message":"Os dados informados são inválidos.","details":{}},"request_id":"example"}
+     */
     public function show(Company $company): CompanyResource
     {
         Gate::authorize('view', $company);
@@ -57,6 +87,16 @@ class CompanyController extends Controller
         return new CompanyResource($company);
     }
 
+    /**
+     * Atualizar empresa.
+     *
+     * @responseFile 200 docs/examples/company.json
+     *
+     * @response 401 {"error":{"code":"unauthenticated","message":"Credenciais inválidas ou autenticação necessária.","details":{}},"request_id":"example"}
+     * @response 403 {"error":{"code":"forbidden","message":"Acesso não permitido.","details":{}},"request_id":"example"}
+     * @response 404 {"error":{"code":"not_found","message":"Recurso não encontrado.","details":{}},"request_id":"example"}
+     * @response 422 {"error":{"code":"validation_failed","message":"Os dados informados são inválidos.","details":{}},"request_id":"example"}
+     */
     public function update(CompanyWriteRequest $request, Company $company): CompanyResource
     {
         try {

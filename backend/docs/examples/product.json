@@ -1,0 +1,26 @@
+{
+  "data": {
+    "id": 1,
+    "company_id": 1,
+    "description": "Produto exemplo",
+    "ean": "7894900011517",
+    "internal_code": "PROD-01",
+    "ncm_code": "01012100",
+    "classification_status": "sugerida",
+    "confirmed_by": null,
+    "confirmed_at": null,
+    "created_at": "2026-11-12T18:00:00.000000Z",
+    "updated_at": "2026-11-12T18:00:00.000000Z",
+    "ncm": {
+      "code": "01012100",
+      "description": "Cavalos reprodutores de raça pura",
+      "valid_from": "2022-04-01",
+      "valid_until": "9999-12-31",
+      "legal_act": "Res Gecex 272/2021",
+      "source": "https://portalunico.siscomex.gov.br/classif/api/publico/nomenclatura/download/json",
+      "imported_at": "2026-11-12T18:00:00.000000Z",
+      "in_current_table": true,
+      "is_current": true
+    }
+  }
+}

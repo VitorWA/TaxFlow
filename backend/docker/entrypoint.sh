@@ -3,6 +3,12 @@ set -e
 
 cd /app
 
+# Consumidores aguardam API healthy e reutilizam o vendor já preparado.
+if [ "${TAXFLOW_SKIP_BOOTSTRAP:-0}" = "1" ]; then
+    test -f vendor/autoload.php || exit 1
+    exec "$@"
+fi
+
 if [ ! -f .env ]; then
     echo "backend/.env não encontrado. Rode: cp backend/.env.example backend/.env" >&2
     exit 1

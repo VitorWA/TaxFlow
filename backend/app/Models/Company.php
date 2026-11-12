@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property TaxRegime $tax_regime
@@ -16,6 +17,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  */
 class Company extends Model
 {
+    /** @return HasMany<Establishment, $this> */
+    public function establishments(): HasMany
+    {
+        return $this->hasMany(Establishment::class);
+    }
+
     /** @use HasFactory<CompanyFactory> */
     use HasFactory;
 

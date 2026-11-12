@@ -12,6 +12,18 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
+    /**
+     * Entrar e obter token Sanctum.
+     *
+     * @group Autenticação
+     *
+     * @unauthenticated
+     *
+     * @response 200 {"data":{"token":"example-token","token_type":"Bearer","user":{"id":1,"name":"Exemplo","email":"dev@example.test"}}}
+     * @response 401 {"error":{"code":"unauthenticated","message":"Credenciais inválidas ou autenticação necessária.","details":{}},"request_id":"example"}
+     * @response 422 {"error":{"code":"validation_failed","message":"Os dados informados são inválidos.","details":{"email":["O campo email é obrigatório."]}},"request_id":"example"}
+     * @response 429 {"error":{"code":"too_many_requests","message":"Muitas tentativas. Tente novamente mais tarde.","details":{}},"request_id":"example"}
+     */
     public function login(LoginRequest $request): JsonResource
     {
         $user = User::where('email', $request->validated('email'))->first();
@@ -28,11 +40,30 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Consultar usuário autenticado.
+     *
+     * @responseFile 200 docs/examples/user.json
+     *
+     * @response 401 {"error":{"code":"unauthenticated","message":"Credenciais inválidas ou autenticação necessária.","details":{}},"request_id":"example"}
+     * @response 403 {"error":{"code":"forbidden","message":"Acesso não permitido.","details":{}},"request_id":"example"}
+     * @response 404 {"error":{"code":"not_found","message":"Recurso não encontrado.","details":{}},"request_id":"example"}
+     * @response 422 {"error":{"code":"validation_failed","message":"Os dados informados são inválidos.","details":{}},"request_id":"example"}
+     */
     public function me(Request $request): UserResource
     {
         return new UserResource($request->user());
     }
 
+    /**
+     * Revogar somente o token Bearer usado nesta requisição.
+     *
+     * @response 200 {"data":{"message":"Sessão encerrada."}}
+     * @response 401 {"error":{"code":"unauthenticated","message":"Credenciais inválidas ou autenticação necessária.","details":{}},"request_id":"example"}
+     * @response 403 {"error":{"code":"forbidden","message":"Acesso não permitido.","details":{}},"request_id":"example"}
+     * @response 404 {"error":{"code":"not_found","message":"Recurso não encontrado.","details":{}},"request_id":"example"}
+     * @response 422 {"error":{"code":"validation_failed","message":"Os dados informados são inválidos.","details":{}},"request_id":"example"}
+     */
     public function logout(Request $request): JsonResource
     {
         $request->user()->currentAccessToken()->delete();

@@ -1,0 +1,30 @@
+{
+  "data": [
+    {
+      "code": "01012100",
+      "description": "Cavalos reprodutores de raça pura",
+      "valid_from": "2022-04-01",
+      "valid_until": "9999-12-31",
+      "legal_act": "Res Gecex 272/2021",
+      "source": "https://portalunico.siscomex.gov.br/classif/api/publico/nomenclatura/download/json",
+      "imported_at": "2026-11-12T18:00:00.000000Z",
+      "in_current_table": true,
+      "is_current": true
+    }
+  ],
+  "links": {
+    "first": "http://localhost:8000/api/v1/ncms?page=1",
+    "last": null,
+    "prev": null,
+    "next": null
+  },
+  "meta": {
+    "current_page": 1,
+    "from": 1,
+    "last_page": 1,
+    "path": "http://localhost:8000/api/v1/ncms",
+    "per_page": 15,
+    "to": 1,
+    "total": 1
+  }
+}

@@ -1,0 +1,17 @@
+.env
+.env.*
+!.env.example
+vendor
+node_modules
+storage/logs/*
+storage/framework/cache/*
+bootstrap/cache/*.php
+tests
+.scribe
+docs
+public/vendor/scribe
+resources/views/scribe
+storage/app/*
+storage/framework/sessions/*
+storage/framework/views/*
+database/*.sqlite*
