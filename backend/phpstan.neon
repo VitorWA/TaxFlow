@@ -1,0 +1,14 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 5
+    paths:
+        - app
+        - database/factories
+        - database/seeders
+    tmpDir: storage/framework/cache/phpstan
+    ignoreErrors:
+        # The trait is exercised by tests until the dependent resource models exist.
+        - identifier: trait.unused
+          path: app/Models/Concerns/BelongsToCompany.php

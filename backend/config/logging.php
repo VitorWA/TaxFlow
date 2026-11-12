@@ -1,5 +1,6 @@
 <?php
 
+use Monolog\Formatter\JsonFormatter;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
@@ -51,6 +52,13 @@ return [
     */
 
     'channels' => [
+
+        'api' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/api.log'),
+            'formatter' => JsonFormatter::class,
+            'level' => 'info',
+        ],
 
         'stack' => [
             'driver' => 'stack',
