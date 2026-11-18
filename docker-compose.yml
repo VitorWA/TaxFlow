@@ -8,3 +8,62 @@ services:
       - .:/app
       - /app/node_modules
     command: npm run dev
+
+  api:
+    build:
+      context: ./backend
+    # Laravel lê backend/.env pelo bind mount; env_file injetaria valores
+    # antigos (ex.: APP_KEY vazia) que teriam precedência sobre o arquivo.
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - ./backend:/app
+      - api-vendor:/app/vendor
+    # O healthcheck padrão da imagem usa o admin do Caddy (:2019), que o
+    # php-server desativa.
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8000/up"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Credenciais de dev: precisam bater com backend/.env.example.
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-taxflow}
+      MYSQL_USER: ${DB_USERNAME:-taxflow}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+    ports:
+      # Só loopback: MySQL não fica acessível pela rede local.
+      - "127.0.0.1:${DB_FORWARD_PORT:-3306}:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      # Só loopback: Redis de dev não tem senha.
+      - "127.0.0.1:${REDIS_FORWARD_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  db-data:
+  api-vendor:

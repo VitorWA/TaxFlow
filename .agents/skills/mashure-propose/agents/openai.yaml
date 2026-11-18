@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mashure: Propor Change"
+  short_description: "Cria uma change OpenSpec completa"
+  default_prompt: "Use $mashure-propose para executar este fluxo Mashure."

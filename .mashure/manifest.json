@@ -2,48 +2,129 @@
   "schemaVersion": 1,
   "packageVersion": "0.1.0",
   "tools": [
+    "codex",
     "claude"
   ],
   "files": [
     {
+      "path": ".agents/skills/mashure-setup/SKILL.md",
+      "sha256": "88eb2f8ca31b83c3c09a5be6c7f65f50641230be6bfc359c9d02986bc05974f4"
+    },
+    {
+      "path": ".agents/skills/mashure-setup/agents/openai.yaml",
+      "sha256": "4cce84a35c677af2567d4c42412d056d123c197076464fbc07a677a67d811b88"
+    },
+    {
+      "path": ".agents/skills/mashure-req-interview/SKILL.md",
+      "sha256": "9767af61b74923dd4a17a1c412a89be4c7ec85497cfaa7334cc56ead213ed874"
+    },
+    {
+      "path": ".agents/skills/mashure-req-interview/agents/openai.yaml",
+      "sha256": "da33a5f876b8d6afeafed55d15382cd6480f6e7563bcea801f5d31b174f5a786"
+    },
+    {
+      "path": ".agents/skills/mashure-tech-interview/SKILL.md",
+      "sha256": "fced56285fa59f34ce23344c56abb853e4946cf0e561545303c39c6c1b7c682a"
+    },
+    {
+      "path": ".agents/skills/mashure-tech-interview/agents/openai.yaml",
+      "sha256": "2b227dffe2bb337328608763c618a1f8b9c0dc04f65f1f70d85c5130453afef1"
+    },
+    {
+      "path": ".agents/skills/mashure-propose/SKILL.md",
+      "sha256": "a5be7ddbd5b44b91007f9bf58a96c905f5f5940d95f87c4153735c3082af2d30"
+    },
+    {
+      "path": ".agents/skills/mashure-propose/agents/openai.yaml",
+      "sha256": "ad1bfa9dd7ad440b4bf0f3da10724dd6722278a9ca680ad6db7b7eee296ee453"
+    },
+    {
+      "path": ".agents/skills/mashure-apply/SKILL.md",
+      "sha256": "c9d0c0658f2fc0b4dd19766e0a4158c903d58af5467a2c491ad5b6285a60b6fc"
+    },
+    {
+      "path": ".agents/skills/mashure-apply/agents/openai.yaml",
+      "sha256": "5a01f345b791f77bd89d5c2d0987ce30ca3e84621af6f3aa34a2f4ffcf9bc03f"
+    },
+    {
+      "path": ".agents/skills/mashure-explore/SKILL.md",
+      "sha256": "30d6409a1dfb69d1dbe2b823b2e8d45636e39e14a4374a9e124789b3c09a716f"
+    },
+    {
+      "path": ".agents/skills/mashure-explore/agents/openai.yaml",
+      "sha256": "163eeb47c3b8248f7f12bb1df6f28bfe92db4ff6e34af1e76a6acd881bd5fb77"
+    },
+    {
+      "path": ".agents/skills/mashure-review/SKILL.md",
+      "sha256": "2a72dde5d36fcdf6d0a24c324a58fd08b17e6e8a98a75521b4c1d67868799f50"
+    },
+    {
+      "path": ".agents/skills/mashure-review/agents/openai.yaml",
+      "sha256": "15f7dd0ce842702eae7d2d11d16f394188561c2cf7b82cfb2ce9a405f15686ce"
+    },
+    {
+      "path": ".agents/skills/mashure-capture/SKILL.md",
+      "sha256": "204e8e82afc34af6f834f72d27bb3c4643da6a4ed618b8da05ed8494da4766bf"
+    },
+    {
+      "path": ".agents/skills/mashure-capture/agents/openai.yaml",
+      "sha256": "a43a1d382bb8949eaac9509337286f3a06494b5c443e7b37c287a699239d56a5"
+    },
+    {
+      "path": ".agents/skills/mashure-sync/SKILL.md",
+      "sha256": "f882d44264d74915f563d2ad99a620d493e0db6f335ef5bd1e317fbac0e1ff54"
+    },
+    {
+      "path": ".agents/skills/mashure-sync/agents/openai.yaml",
+      "sha256": "d50459a2ef08eda50203c6aaca90c5c9c43acd6a57738f7190be7c5bce9313a8"
+    },
+    {
+      "path": ".agents/skills/mashure-archive/SKILL.md",
+      "sha256": "2c294b28513cf0471142c3a89b48be848356aa219bb1c0f644e1832b330f0327"
+    },
+    {
+      "path": ".agents/skills/mashure-archive/agents/openai.yaml",
+      "sha256": "a6a26c51eb792dd57e1adb69f328036d85abaaf1fddb7a724c7cb14f2afb0363"
+    },
+    {
       "path": ".claude/skills/mashure-setup/SKILL.md",
-      "sha256": "9fef9935e14b983620f33d8cc9df391a0d6b3ede99d751c615acbb1604976c1e"
+      "sha256": "d3a887e9c0a1870b4520239352a4a6b654339295f7679b5d84ceeaad9673b3be"
     },
     {
       "path": ".claude/skills/mashure-req-interview/SKILL.md",
-      "sha256": "a6b7470242ec08aecbef717afb2140328db1aa88d42bd06ac4693d75c5810836"
+      "sha256": "3af8465dd6ae59de8904173ba415c0ddca928adf6dbed4b319b6dbb211c973ff"
     },
     {
       "path": ".claude/skills/mashure-tech-interview/SKILL.md",
-      "sha256": "a31f933c4165cbe8e6cdc6c1afba0169204327d9f321fcf155b28dbacdb09e74"
+      "sha256": "a9e5db97c636ace64b60b75f44c87e45a5339338d6ef591be940f9aa83aab4c4"
     },
     {
       "path": ".claude/skills/mashure-propose/SKILL.md",
-      "sha256": "c2ecd7e88cc9ea964182d9d2e961cbad56211308d55d8459c3c11a19f6388bf7"
+      "sha256": "6e6deab8b0abd1dc2eaaa56b50bf101c4b86ea24e7e3b81e07643b46bcc1fdcd"
     },
     {
       "path": ".claude/skills/mashure-apply/SKILL.md",
-      "sha256": "25b260fa15eb341b56849246e22d9679d9e12d132958e33025fae44fe11bef1c"
+      "sha256": "a9d7b4fea7026ec5de7dc7fd55b877dd27c52b244a7519b37e9f74b4d9d85238"
     },
     {
       "path": ".claude/skills/mashure-explore/SKILL.md",
-      "sha256": "fa70c707b44ec450eab326815d1a40e157496ef5195f16f34527fb0730629a36"
+      "sha256": "0c4dfa587025d43be29da37f9478b0b5071768df035d874a6908e4754198c481"
     },
     {
       "path": ".claude/skills/mashure-review/SKILL.md",
-      "sha256": "1affe3326ea207b17698a2d7423e9ef8c808e670f27ae5b3f2bc4ee5c9a0eb6e"
+      "sha256": "15e239b93a833126e30db0990fbfbd2cf28d6415fbd6616f6118a01930f2e115"
     },
     {
       "path": ".claude/skills/mashure-capture/SKILL.md",
-      "sha256": "7de93db15acf87a793a85b0331bbed29a20bb346ec691a708aaf00c204cf4e51"
+      "sha256": "a79242d13a6f83fcb34ec56be0235e7496dbdcd89d4b0480a5d72427ce6e4361"
     },
     {
       "path": ".claude/skills/mashure-sync/SKILL.md",
-      "sha256": "0f14814928b0635260746cdb1491d3caff8aeb7e1dde39419c2e79718182e167"
+      "sha256": "92a217e27f681d4b17d6c68e6b480584a3c8057977ebd4a5654e0d6c798c378f"
     },
     {
       "path": ".claude/skills/mashure-archive/SKILL.md",
-      "sha256": "688ea67afd035e74f4dcb4556ea1b2d11efea95bc86b4a98bfa5821692bc81f1"
+      "sha256": "2c294b28513cf0471142c3a89b48be848356aa219bb1c0f644e1832b330f0327"
     }
   ]
 }

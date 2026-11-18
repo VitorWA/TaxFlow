@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mashure: Entrevista T�cnica"
+  short_description: "Fecha decis�es t�cnicas antes da proposta"
+  default_prompt: "Use $mashure-tech-interview para executar este fluxo Mashure."

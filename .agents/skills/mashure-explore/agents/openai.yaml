@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mashure: Explorar"
+  short_description: "Investiga quest�es sem implementar"
+  default_prompt: "Use $mashure-explore para executar este fluxo Mashure."

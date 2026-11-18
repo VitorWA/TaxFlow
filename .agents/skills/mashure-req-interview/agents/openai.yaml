@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mashure: Entrevista de Requisitos"
+  short_description: "Transforma demanda em PRD rastre�vel"
+  default_prompt: "Use $mashure-req-interview para executar este fluxo Mashure."

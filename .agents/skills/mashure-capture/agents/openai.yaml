@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mashure: Capturar Trabalho"
+  short_description: "Reconstr�i change de trabalho existente"
+  default_prompt: "Use $mashure-capture para executar este fluxo Mashure."

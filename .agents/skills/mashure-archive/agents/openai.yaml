@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mashure: Arquivar Change"
+  short_description: "Valida, sincroniza e arquiva a change"
+  default_prompt: "Use $mashure-archive para executar este fluxo Mashure."
