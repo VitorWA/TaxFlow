@@ -1,0 +1,7 @@
+# Use this workspace to collaborate
+workspace:
+  id: 278a3443-775f-4202-af95-9b67632f9ba0
+
+localResources:
+  collections:
+    - ../docs/postman/TaxFlow.postman_collection.json
